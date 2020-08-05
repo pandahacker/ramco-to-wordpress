@@ -1,0 +1,22 @@
+{
+  "name": "ramco_class_to_wordpress",
+  "version": "1.0.0",
+  "description": "Import classes from RAMCO into Wordpress install",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Blake Albertson",
+  "license": "ISC",
+  "dependencies": {
+    "doasync": "^2.0.1",
+    "dotenv": "^8.0.0",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.25",
+    "node-fetch": "^2.5.0",
+    "node-schedule": "^1.3.2",
+    "pushbullet": "^2.4.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
+  }
+}

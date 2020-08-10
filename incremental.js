@@ -12,9 +12,7 @@ var j = schedule.scheduleJob('30 * * * *', function () {
 
 async function pushClasses(){
 
-    //dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD"+`T`+"HH"+`:00:00`);
-
-    dateStart = moment().format("YYYY-MM-DD" + `T` + `00:00:00`);
+    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD"+`T`+"HH"+`:00:00`);
 
     console.log(dateStart);
 

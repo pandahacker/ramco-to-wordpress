@@ -10,8 +10,6 @@ var j = schedule.scheduleJob('0 * * * *', function () {
     pushClasses();
 });
 
-pushClasses();
-
 async function pushClasses() {
 
     fs.appendFile('logs.txt', `[${moment().format('h:mm:ss a')}] RAMCO to WordPress Sync started.  \n`, (err) => {

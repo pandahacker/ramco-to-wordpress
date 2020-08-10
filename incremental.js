@@ -12,7 +12,9 @@ var j = schedule.scheduleJob('30 * * * *', function () {
 
 async function pushClasses(){
 
-    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD"+`T`+"HH"+`:00:00`);
+    //dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD"+`T`+"HH"+`:00:00`);
+
+    dateStart = moment().format("YYYY-MM-DD" + `T` + `00:00:00`);
 
     console.log(dateStart);
 
@@ -159,7 +161,7 @@ async function pushClasses(){
 
                 if (data.cobalt_cobalt_classinstructor_cobalt_class.length > 0) {
 
-                    console.log(data.cobalt_cobalt_classinstructor_cobalt_class);
+                    //console.log(data.cobalt_cobalt_classinstructor_cobalt_class);
 
                     const classInstructor = data.cobalt_cobalt_classinstructor_cobalt_class.map(function (data) {
 
@@ -167,17 +169,17 @@ async function pushClasses(){
 
                     });
 
-                    console.log(classInstructor[0]);
+                    //console.log(classInstructor[0]);
 
                     data.cobalt_Description = `<p style="font-weight:bold;color: black;">Instructor: ${classInstructor[0]}</p><br><br>${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_classId}'" />`
 
-                    console.log(data.cobalt_Description);
+                    //console.log(data.cobalt_Description);
 
                 } else {
 
                     data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_classId}'" />`
 
-                    console.log(data.cobalt_Description);
+                    //console.log(data.cobalt_Description);
 
                 }
 
@@ -204,8 +206,8 @@ async function pushClasses(){
 
     var data = await pullClasses;
 
-    console.log(data.length);
-
+    //console.log(data.length);
+    var featuredClasses = [];
     var existingClasses = [];
     var newClasses = [];
 
@@ -216,9 +218,10 @@ async function pushClasses(){
 
             setTimeout(function () {
                 fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`)
-                    .then(function (res) {
+                    .then(res => res.json())
+                    .then(function(json){
                         console.log(`checking class ${i + 1} of ${data.length}`);
-                        resolve(res.status);
+                        resolve(json);
                     });
             }, 1000)
 
@@ -226,10 +229,41 @@ async function pushClasses(){
 
         var response = await checkIfExists;
 
-        console.log(response);
+        //console.log(response);
 
-        if (response === 200) {
-            existingClasses.push(data[i]);
+        if (Number.isInteger(response.id)) {
+
+            const responseTags = response.tags.map(function (data) {
+
+                return data.name;
+
+            });
+            
+            var allTags = data[i].cobalt_cobalt_tag_cobalt_class.concat(responseTags);
+
+            console.log(response.url);
+
+            //console.log(data[i].cobalt_cobalt_tag_cobalt_class);
+            //console.log(responseTags);
+            //console.log(allTags);
+
+            var filteredTags = allTags.filter((a, b) => allTags.indexOf(a) === b);
+
+            if (response.image.url === undefined){
+
+                data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
+                console.log(`No class image!`);
+                existingClasses.push(data[i]);
+
+            }else {
+
+                data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
+                data[i].featuredImage = response.image.url;
+                console.log(response.image.url);
+                featuredClasses.push(data[i]);
+
+            }
+
         } else {
             newClasses.push(data[i]);
         }
@@ -241,6 +275,7 @@ async function pushClasses(){
     
     // console.log(newClasses);
     modifyExistingClass(existingClasses);
+    modifyFeaturedClass(featuredClasses);
 
     function modifyExistingClass(data) {
         for (var i = 0; i < data.length; i++) {
@@ -275,7 +310,49 @@ async function pushClasses(){
                         },
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
-                        .then(body => console.log(body.hide_from_listings));
+                        .then(body => console.log(body));
+                    console.log(`Class ${i + 1} out of ${data.length} existing processed: ${data[i].cobalt_name}`);
+
+                }, 3000 * i);
+            })(i);
+        };
+    }
+
+    function modifyFeaturedClass(data) {
+        for (var i = 0; i < data.length; i++) {
+            // for each iteration console.log a word
+            // and make a pause after it
+            (function (i) {
+                setTimeout(function () {
+                    var ramcoClass = {
+                        "title": data[i].cobalt_name,
+                        "status": "publish",
+                        "hide_from_listings": data[i].publish,
+                        "description": data[i].cobalt_Description,
+                        "image": data[i].featuredImage,
+                        "all_day": data[i].all_day,
+                        "start_date": data[i].cobalt_ClassBeginDate.Display,
+                        "end_date": data[i].cobalt_ClassEndDate.Display,
+                        "slug": data[i].cobalt_classId,
+                        "categories": data[i].cobalt_cobalt_tag_cobalt_class,
+                        "show_map_link": true,
+                        "show_map": true,
+                        "cost": data[i].cobalt_price,
+                        "tags": data[i].cobalt_cobalt_tag_cobalt_class,
+                        "venue": {
+                            "id": data[i].locationId
+                        }
+                    };
+
+                    fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
+                        },
+                        body: JSON.stringify(ramcoClass)
+                    }).then(res => res.json()) // expecting a json response
+                        .then(body => console.log(body));
                     console.log(`Class ${i + 1} out of ${data.length} existing processed: ${data[i].cobalt_name}`);
 
                 }, 3000 * i);

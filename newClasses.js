@@ -6,11 +6,9 @@ var schedule = require('node-schedule');
 require('dotenv').config();
 var fs = require('fs');
 
-
 var j = schedule.scheduleJob('0 * * * *', function () {
     pushClasses();
 });
-
 
 async function pushClasses() {
 

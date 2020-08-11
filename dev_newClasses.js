@@ -6,6 +6,11 @@ var schedule = require('node-schedule');
 require('dotenv').config();
 var fs = require('fs');
 
+
+// var j = schedule.scheduleJob('0 * * * *', function () {
+//     pushClasses();
+// });
+
 pushClasses();
 
 async function pushClasses() {
@@ -47,6 +52,35 @@ async function pushClasses() {
 
                 data.cobalt_ClassBeginDate.Display = start.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
                 data.cobalt_ClassEndDate.Display = end.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
+
+                const orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
+
+                    return data.cobalt_productid.Value;
+
+                });
+
+                var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });
+
+                prices = JSON.parse(prices);
+
+                var cost = prices.filter(function (price) {
+
+                    //console.log(orderId[0]);
+
+                    if (price.ProductId === orderId[0]) {
+                        //console.log(price.Price);
+                        return price;
+                    }
+
+                });
+
+                if (cost.length > 0) {
+                    data.cobalt_price = cost[0].Price;
+                } else {
+                    data.cobalt_price = '0.0000';
+                }
+
+                data.cobalt_price = data.cobalt_price.slice(0, -2);
 
                 const tags = data.cobalt_cobalt_tag_cobalt_class.map(function (data) {
 
@@ -248,13 +282,14 @@ async function pushClasses() {
                         "categories": data[i].cobalt_cobalt_tag_cobalt_class,
                         "show_map_link": true,
                         "show_map": true,
+                        "cost": data[i].cobalt_price,
                         "tags": data[i].cobalt_cobalt_tag_cobalt_class,
                         "venue": {
                             "id": data[i].locationId
                         }
                     };
 
-                    fetch(`${process.env.WORDPRESS_URL}`, {
+                    fetch(process.env.WORDPRESS_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

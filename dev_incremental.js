@@ -12,9 +12,11 @@ var fs = require('fs');
 
 pushClasses();
 
-async function pushClasses() {
+async function pushClasses(){
 
-    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
+    //dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD"+`T`+"HH"+`:00:00`);
+
+    dateStart = moment().format("YYYY-MM-DD" + `T` + `00:00:00`);
 
     console.log(dateStart);
 
@@ -47,6 +49,35 @@ async function pushClasses() {
                 data.cobalt_ClassBeginDate.Display = start.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
                 data.cobalt_ClassEndDate.Display = end.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
 
+                const orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
+
+                    return data.cobalt_productid.Value;
+
+                });
+
+                var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });
+
+                prices = JSON.parse(prices);
+
+                var cost = prices.filter(function (price) {
+
+                    //console.log(orderId[0]);
+
+                    if (price.ProductId === orderId[0]) {
+                        //console.log(price.Price);
+                        return price;
+                    }
+
+                });
+
+                if (cost.length > 0) {
+                    data.cobalt_price = cost[0].Price;
+                } else {
+                    data.cobalt_price = '0.0000';
+                }
+
+                data.cobalt_price = data.cobalt_price.slice(0, -2);
+
                 const tags = data.cobalt_cobalt_tag_cobalt_class.map(function (data) {
 
                     var tags = {
@@ -55,8 +86,6 @@ async function pushClasses() {
 
                     return data.cobalt_name;
                 });
-
-                
 
                 data.statuscode = data.statuscode.Display;
 
@@ -179,21 +208,22 @@ async function pushClasses() {
 
     var data = await pullClasses;
 
-    console.log(data.length);
-
+    //console.log(data.length);
+    var featuredClasses = [];
     var existingClasses = [];
     var newClasses = [];
 
-
+    
     for (i = 0; i < data.length; i++) {
 
         var checkIfExists = new Promise(function (resolve, reject) {
 
             setTimeout(function () {
                 fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`)
-                    .then(function (res) {
+                    .then(res => res.json())
+                    .then(function(json){
                         console.log(`checking class ${i + 1} of ${data.length}`);
-                        resolve(res.status);
+                        resolve(json);
                     });
             }, 1000)
 
@@ -201,10 +231,41 @@ async function pushClasses() {
 
         var response = await checkIfExists;
 
-        console.log(response);
+        //console.log(response);
 
-        if (response === 200) {
-            existingClasses.push(data[i]);
+        if (Number.isInteger(response.id)) {
+
+            const responseTags = response.tags.map(function (data) {
+
+                return data.name;
+
+            });
+            
+            var allTags = data[i].cobalt_cobalt_tag_cobalt_class.concat(responseTags);
+
+            console.log(response.url);
+
+            //console.log(data[i].cobalt_cobalt_tag_cobalt_class);
+            //console.log(responseTags);
+            //console.log(allTags);
+
+            var filteredTags = allTags.filter((a, b) => allTags.indexOf(a) === b);
+
+            if (response.image.url === undefined){
+
+                data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
+                console.log(`No class image!`);
+                existingClasses.push(data[i]);
+
+            }else {
+
+                data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
+                data[i].featuredImage = response.image.url;
+                console.log(response.image.url);
+                featuredClasses.push(data[i]);
+
+            }
+
         } else {
             newClasses.push(data[i]);
         }
@@ -213,9 +274,10 @@ async function pushClasses() {
 
     console.log(`Found ${existingClasses.length} existing classes and discarding ${newClasses.length} new classes.`);
 
-
+    
     // console.log(newClasses);
     modifyExistingClass(existingClasses);
+    modifyFeaturedClass(featuredClasses);
 
     function modifyExistingClass(data) {
         for (var i = 0; i < data.length; i++) {
@@ -235,6 +297,7 @@ async function pushClasses() {
                         "categories": data[i].cobalt_cobalt_tag_cobalt_class,
                         "show_map_link": true,
                         "show_map": true,
+                        "cost": data[i].cobalt_price,
                         "tags": data[i].cobalt_cobalt_tag_cobalt_class,
                         "venue": {
                             "id": data[i].locationId
@@ -249,8 +312,50 @@ async function pushClasses() {
                         },
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
-                        .then(body => console.log(body.hide_from_listings));
+                        .then(body => console.log());
                     console.log(`Class ${i + 1} out of ${data.length} existing processed: ${data[i].cobalt_name}`);
+
+                }, 3000 * i);
+            })(i);
+        };
+    }
+
+    function modifyFeaturedClass(data) {
+        for (var i = 0; i < data.length; i++) {
+            // for each iteration console.log a word
+            // and make a pause after it
+            (function (i) {
+                setTimeout(function () {
+                    var ramcoClass = {
+                        "title": data[i].cobalt_name,
+                        "status": "publish",
+                        "hide_from_listings": data[i].publish,
+                        "description": data[i].cobalt_Description,
+                        "image": data[i].featuredImage,
+                        "all_day": data[i].all_day,
+                        "start_date": data[i].cobalt_ClassBeginDate.Display,
+                        "end_date": data[i].cobalt_ClassEndDate.Display,
+                        "slug": data[i].cobalt_classId,
+                        "categories": data[i].cobalt_cobalt_tag_cobalt_class,
+                        "show_map_link": true,
+                        "show_map": true,
+                        "cost": data[i].cobalt_price,
+                        "tags": data[i].cobalt_cobalt_tag_cobalt_class,
+                        "venue": {
+                            "id": data[i].locationId
+                        }
+                    };
+
+                    fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
+                        },
+                        body: JSON.stringify(ramcoClass)
+                    }).then(res => res.json()) // expecting a json response
+                        .then(body => console.log());
+                    console.log(`Class ${i + 1} out of ${data.length} existing featured processed: ${data[i].cobalt_name}`);
 
                 }, 3000 * i);
             })(i);

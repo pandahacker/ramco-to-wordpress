@@ -308,7 +308,7 @@ async function pushClasses(){
                         },
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
-                        .then(body => console.log(body));
+                        .then(body => console.log());
                     console.log(`Class ${i + 1} out of ${data.length} existing processed: ${data[i].cobalt_name}`);
 
                 }, 3000 * i);
@@ -350,8 +350,8 @@ async function pushClasses(){
                         },
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
-                        .then(body => console.log(body));
-                    console.log(`Class ${i + 1} out of ${data.length} existing processed: ${data[i].cobalt_name}`);
+                        .then(body => console.log());
+                    console.log(`Class ${i + 1} out of ${data.length} existing featured processed: ${data[i].cobalt_name}`);
 
                 }, 3000 * i);
             })(i);

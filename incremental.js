@@ -5,6 +5,7 @@ var moment = require('moment-timezone');
 var schedule = require('node-schedule');
 require('dotenv').config();
 var fs = require('fs');
+var _ = require('lodash');
 
 var j = schedule.scheduleJob('30 * * * *', function () {
     pushClasses();
@@ -54,6 +55,10 @@ async function pushClasses(){
                 var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });
 
                 prices = JSON.parse(prices);
+
+                var fuckedOrder = _.remove(orderId, function(n) {
+                    return n === '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3';
+                  });
 
                 var cost = prices.filter(function (price) {
 

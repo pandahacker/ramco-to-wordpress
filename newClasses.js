@@ -53,8 +53,13 @@ async function pushClasses() {
 
                 var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
 
-                    return data.cobalt_productid.Value;
-
+                    var orderObject = {
+                        "id" : data.cobalt_productid.Value,
+                        "status" : data.statuscode.Value
+                    }
+    
+                    return orderObject;
+    
                 });
 
                 var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });

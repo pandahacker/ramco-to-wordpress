@@ -29,7 +29,7 @@ async function pushClasses() {
                 Operation: 'GetEntity',
                 Entity: 'cobalt_class',
                 Guid: classGuid,
-                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid'
+                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode'
             }
 
         }
@@ -45,9 +45,14 @@ async function pushClasses() {
             data.cobalt_ClassBeginDate.Display = start.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
             data.cobalt_ClassEndDate.Display = end.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
 
-            const orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
+            var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
 
-                return data.cobalt_productid.Value;
+                var orderObject = {
+                    "id" : data.cobalt_productid.Value,
+                    "status" : data.statuscode.Value
+                }
+
+                return orderObject;
 
             });
 
@@ -57,20 +62,19 @@ async function pushClasses() {
 
             console.log(orderId);
 
-            var getFucked = ['8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3'];
-
-            var fuckedOrder = _.remove(orderId, function(n) {
-                return n === '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3';
-              });
+            orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
 
             console.log(orderId);
-            console.log(fuckedOrder);
+
+            orderId = _.filter(orderId, (o) => o.status === 1);
+
+            console.log(orderId);
             
             var cost = prices.filter(function (price) {
 
                 //console.log(orderId[0]);
 
-                if (price.ProductId === orderId[0]) {
+                if (price.ProductId === orderId[0].id) {
                     //console.log(price.Price);
                     return price;
                 }
@@ -84,6 +88,8 @@ async function pushClasses() {
             }
 
             data.cobalt_price = data.cobalt_price.slice(0, -2);
+
+            console.log(data.cobalt_price);
 
             const tags = data.cobalt_cobalt_tag_cobalt_class.map(function (data) {
 

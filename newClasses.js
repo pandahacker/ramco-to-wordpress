@@ -31,7 +31,7 @@ async function pushClasses() {
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
                 Filter: `cobalt_classbegindate<ge>${dateStart}`,
-                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid'
+                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode'
             }
 
         }
@@ -61,15 +61,21 @@ async function pushClasses() {
 
                 prices = JSON.parse(prices);
 
-                var fuckedOrder = _.remove(orderId, function(n) {
-                    return n === '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3';
-                  });
+                console.log(orderId);
 
+                orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
+
+                console.log(orderId);
+
+                orderId = _.filter(orderId, (o) => o.status === 1);
+
+                console.log(orderId);
+                
                 var cost = prices.filter(function (price) {
 
                     //console.log(orderId[0]);
 
-                    if (price.ProductId === orderId[0]) {
+                    if (price.ProductId === orderId[0].id) {
                         //console.log(price.Price);
                         return price;
                     }

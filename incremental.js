@@ -57,36 +57,42 @@ async function pushClasses(){
     
                 });
 
+                // console.log(data.cobalt_name);
+
+
                 var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });
 
                 prices = JSON.parse(prices);
 
-                console.log(orderId);
-
                 orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
-
-                console.log(orderId);
 
                 orderId = _.filter(orderId, (o) => o.status === 1);
 
-                console.log(orderId);
-                
-                var cost = prices.filter(function (price) {
+                // console.log(orderId);
+                // console.log(orderId.length);
 
-                    //console.log(orderId[0]);
+                if(orderId.length > 0) {
+                    
+                    var cost = prices.filter(function (price) {
+    
+                        //console.log(orderId[0]);
+    
+                        if (price.ProductId === orderId[0].id) {
+                            //console.log(price.Price);
+                            return price;
+                        }
+    
+                    });
 
-                    if (price.ProductId === orderId[0].id) {
-                        //console.log(price.Price);
-                        return price;
-                    }
-
-                });
-
-                if (cost.length > 0) {
                     data.cobalt_price = cost[0].Price;
+
                 } else {
                     data.cobalt_price = '0.0000';
                 }
+
+                // console.log(data.cobalt_price);
+
+                // console.log(`-------`);
 
                 data.cobalt_price = data.cobalt_price.slice(0, -2);
 

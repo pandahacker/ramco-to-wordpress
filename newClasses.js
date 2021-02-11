@@ -7,11 +7,11 @@ require('dotenv').config();
 var fs = require('fs');
 var _ = require('lodash');
 
-// var j = schedule.scheduleJob('0 * * * *', function () {
-//     pushClasses();
-// });
+var j = schedule.scheduleJob('0 * * * *', function () {
+     pushClasses();
+});
 
-pushClasses();
+//pushClasses();
 
 async function pushClasses() {
 

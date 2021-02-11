@@ -51,7 +51,7 @@ async function pushClasses() {
                 data.cobalt_ClassBeginDate.Display = start.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
                 data.cobalt_ClassEndDate.Display = end.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
 
-                const orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
+                var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
 
                     return data.cobalt_productid.Value;
 

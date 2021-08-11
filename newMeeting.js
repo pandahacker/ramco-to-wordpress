@@ -4,7 +4,6 @@ const prompt = require('prompt-sync')();
 const fetch = require('node-fetch');
 var moment = require('moment');
 var moment = require('moment-timezone');
-var schedule = require('node-schedule');
 require('dotenv').config();
 var fs = require('fs');
 

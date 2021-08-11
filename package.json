@@ -16,6 +16,7 @@
     "node-cron": "^3.0.0",
     "node-fetch": "^2.6.1",
     "prompt-sync": "^4.2.0",
+    "request": "^2.88.2",
     "request-promise": "^4.2.4"
   }
 }

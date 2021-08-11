@@ -2,14 +2,9 @@ var rp = require('request-promise');
 const fetch = require('node-fetch');
 var moment = require('moment');
 var moment = require('moment-timezone');
-var schedule = require('node-schedule');
 require('dotenv').config();
 var fs = require('fs');
 var _ = require('lodash');
-
-// var j = schedule.scheduleJob('0 * * * *', function () {
-//     pushClasses();
-// });
 
 pushClasses();
 
@@ -73,7 +68,7 @@ async function pushClasses() {
 
                 orderId = _.filter(orderId, (o) => o.status === 1);
 
-                // console.log(orderId);
+                console.log(data.cobalt_classId);
                 // console.log(orderId.length);
 
                 if (orderId.length > 0) {
@@ -248,6 +243,7 @@ async function pushClasses() {
         });
 
         var response = await checkIfExists;
+
         //console.log(data[i].cobalt_name);
         //console.log(response);
         //console.log(data[i].publish);

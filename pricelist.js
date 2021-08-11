@@ -1,6 +1,5 @@
 var rp = require('request-promise');
 const fetch = require('node-fetch');
-var schedule = require('node-schedule');
 require('dotenv').config();
 var fs = require('fs');
 

@@ -245,6 +245,8 @@ async function pushClasses() {
                     .then(function (res) {
                         console.debug(`[${moment().format('h:mm:ss a')}] checking class ${i + 1} of ${data.length}`);
                         resolve(res.status);
+                    }).catch(function (err) {
+                        reject(`Error: ${err}`);
                     });
             }, 1000)
 

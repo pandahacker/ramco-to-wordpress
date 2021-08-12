@@ -241,18 +241,16 @@ async function pushClasses() {
         var checkIfExists = new Promise(function (resolve, reject) {
 
             setTimeout(function () {
+                console.debug(`[${moment().format('h:mm:ss a')}] checking class ${i + 1} of ${data.length}`);
                 fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`)
-                    .then(function (res) {
-                        console.debug(`[${moment().format('h:mm:ss a')}] checking class ${i + 1} of ${data.length}`);
-                        resolve(res.status);
-                    }).catch(function (err) {
-                        reject(`Error: ${err}`);
-                    });
+                    .then(res => resolve(res.status))
+                    .catch(err => console.error(err));
             }, 1000)
 
         });
 
         var response = await checkIfExists;
+        
         //console.log(data[i].cobalt_name);
         //console.log(response);
         //console.log(data[i].publish);

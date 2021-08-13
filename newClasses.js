@@ -280,7 +280,7 @@ async function pushClasses() {
             if (err) throw err;
         });
 
-        if (response === 200) {
+        if (response === 200 || response === 403) {
             existingClasses.push(data[i]);
         } else {
             newClasses.push(data[i]);

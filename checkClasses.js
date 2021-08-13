@@ -7,22 +7,18 @@ require('dotenv').config();
 var fs = require('fs');
 var _ = require('lodash');
 
-// cron.schedule('0 * * * *', () => {
-//     pushClasses();
-// });
-
 pushClasses();
 
 async function pushClasses() {
 
     console.log(`[${moment().format('h:mm:ss a')}] RAMCO to WordPress Sync started.  \n`);
-    fs.appendFile('newClasses.log', `[${ moment().format('h:mm:ss a') }]RAMCO to WordPress Sync started.\n`, (err) => {
+    fs.appendFile('newClasses.log', `[${moment().format('h:mm:ss a')}]RAMCO to WordPress Sync started.\n`, (err) => {
         if (err) throw err;
     });
 
-    dateStart = moment().subtract(1, 'day').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
+    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
 
-    console.log(dateStart);
+    //console.log(dateStart);
 
     var pullClasses = new Promise(function (resolve, reject) {
         var options = {
@@ -32,7 +28,7 @@ async function pushClasses() {
                 Key: process.env.API_KEY,
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
-                Filter: `createdon<ge>${dateStart} AND statuscode<eq>1`,
+                Filter: `cobalt_classbegindate<ge>${dateStart} AND statuscode<eq>1`,
                 Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode'
             }
 
@@ -45,24 +41,19 @@ async function pushClasses() {
 
             //console.log(data.ResponseCode); 
 
-            if(data.ResponseCode === 404){
+            if (data.ResponseCode === 404) {
                 data = [];
-            }else{
+            } else {
                 data = data.Data
             }
-            
+
             //console.log(data.length);
 
             var modifiedData;
 
-
-            if(data.length > 0){
-
-                console.log(`[${moment().format('h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
+            if (data.length > 0) {
 
                 modifiedData = data.map(function (data) {
-
-                    console.log(`[${moment().format('h:mm:ss a')}] Formatting ${data.cobalt_name}  \n`);
 
                     var start = moment.tz(data.cobalt_ClassBeginDate.Display, 'Etc/GMT');
                     var end = moment.tz(data.cobalt_ClassEndDate.Display, 'Etc/GMT');
@@ -73,12 +64,12 @@ async function pushClasses() {
                     var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
 
                         var orderObject = {
-                            "id" : data.cobalt_productid.Value,
-                            "status" : data.statuscode.Value
+                            "id": data.cobalt_productid.Value,
+                            "status": data.statuscode.Value
                         }
-        
+
                         return orderObject;
-        
+
                     });
 
                     //console.log(data);
@@ -96,17 +87,17 @@ async function pushClasses() {
                     // console.log(orderId);
                     // console.log(orderId.length);
 
-                    if(orderId.length > 0) {
-                        
+                    if (orderId.length > 0) {
+
                         var cost = prices.filter(function (price) {
-        
+
                             //console.log(orderId[0]);
-        
+
                             if (price.ProductId === orderId[0].id) {
                                 //console.log(price.Price);
                                 return price;
                             }
-        
+
                         });
 
                         // console.log(data.cobalt_classId);
@@ -235,14 +226,16 @@ async function pushClasses() {
 
                     data.cobalt_cobalt_tag_cobalt_class = tags;
 
-                    //console.debug(`[${moment().format('h:mm:ss a')}] ${JSON.stringify(data)} \n`);
+                    console.debug(data);
 
                     return data;
                 });
-            }else{
+
+
+            } else {
 
                 modifiedData = [];
-            
+
             }
 
             resolve(modifiedData);
@@ -252,101 +245,5 @@ async function pushClasses() {
                 reject(`Error: ${err}`);
             });
     });
-
-    var data = await pullClasses;
-
-    var existingClasses = [];
-    var newClasses = [];
-
-    for (i = 0; i < data.length; i++) {
-
-        var checkIfExists = new Promise(function (resolve, reject) {
-
-            setTimeout(function () {
-                fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`)
-                    .then(res => resolve(res.status))
-                    .catch(err => reject(`Error: ${err}`));
-            }, 1000)
-
-        });
-
-        var response = await checkIfExists;
-        //console.log(data[i].cobalt_name);
-        //console.log(response);
-        //console.log(data[i].publish);
-
-        console.log(`[${moment().format('h:mm:ss a')}] Checking ${data[i].cobalt_name} is already in WordPress. Publish: ${data[i].publish} Response: ${response} \n`);
-        fs.appendFile('newClasses.log', `[${moment().format('h:mm:ss a')}] Checking ${data[i].cobalt_name} is already in WordPress. Publish: ${data[i].publish} Response: ${response} \n`, (err) => {
-            if (err) throw err;
-        });
-
-        if (response === 200) {
-            existingClasses.push(data[i]);
-        } else {
-            newClasses.push(data[i]);
-        }
-
-    };
-
-
-
-    //console.log(existingClasses.length);
-    //console.log(newClasses.length);
-
-    fs.appendFile('newClasses.log', `[${moment().format('h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`, (err) => {
-        if (err) throw err;
-    });
-
-    console.log(`[${moment().format('h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`);
-
-
-    //submitNewClass(newClasses);
-
-    function submitNewClass(data) {
-        for (var i = 0; i < data.length; i++) {
-            // for each iteration console.log a word
-            // and make a pause after it
-            (function (i) {
-                setTimeout(function () {
-                    var ramcoClass = {
-                        "title": data[i].cobalt_name,
-                        "status": "publish",
-                        "hide_from_listings": data[i].publish,
-                        "description": data[i].cobalt_Description,
-                        "all_day": data[i].all_day,
-                        "start_date": data[i].cobalt_ClassBeginDate.Display,
-                        "end_date": data[i].cobalt_ClassEndDate.Display,
-                        "slug": data[i].cobalt_classId,
-                        "categories": data[i].cobalt_cobalt_tag_cobalt_class,
-                        "show_map_link": true,
-                        "show_map": true,
-                        "cost": data[i].cobalt_price,
-                        "tags": data[i].cobalt_cobalt_tag_cobalt_class,
-                        "venue": {
-                            "id": data[i].locationId
-                        }
-                    };
-
-                    fetch(process.env.WORDPRESS_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
-                        },
-                        body: JSON.stringify(ramcoClass)
-                    }).then(res => res.json()) // expecting a json response
-                        .then(body => fs.appendFile('results.json', `[${moment().format('h:mm:ss a')}] ${JSON.stringify(body)} \n`, (err) => {
-                            if (err) throw err;
-                        }));
-                    console.log(`Class ${i + 1} out of ${data.length} new processed: ${data[i].cobalt_name}
-                    `);
-                    fs.appendFile('newClasses.log', `[${moment().format('h:mm:ss a')}] Class ${i + 1} out of ${data.length} new processed: ${data[i].cobalt_name} \n`, (err) => {
-                        if (err) throw err;
-                    });
-                }, 3000 * i);
-            })(i);
-        };
-
-    }
 
 }

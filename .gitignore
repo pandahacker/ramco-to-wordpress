@@ -13,6 +13,7 @@ results.json
 
 # Enviroment Variables
 .env
+.vscode
 
 
 

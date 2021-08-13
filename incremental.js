@@ -1,6 +1,6 @@
 var rp = require('request-promise');
 const fetch = require('node-fetch');
-var moment = require('moment');
+var momzent = require('moment');
 var moment = require('moment-timezone');
 var cron = require('node-cron');
 require('dotenv').config();

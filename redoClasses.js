@@ -2,13 +2,8 @@ var rp = require('request-promise');
 const fetch = require('node-fetch');
 var moment = require('moment');
 var moment = require('moment-timezone');
-var schedule = require('node-schedule');
 require('dotenv').config();
 var fs = require('fs');
-
-// var j = schedule.scheduleJob('30 * * * *', function () {
-//     pushClasses();
-// });
 
 pushClasses();
 
@@ -28,7 +23,7 @@ async function pushClasses() {
                 Key: process.env.API_KEY,
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
-                Filter: `modifiedon<ge>${dateStart}`,
+                Filter: `cobalt_classbegindate<ge>${dateStart}`,
                 Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid'
             }
 

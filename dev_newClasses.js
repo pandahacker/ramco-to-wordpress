@@ -8,14 +8,29 @@ var _ = require('lodash');
 
 pushClasses();
 
+function sendSlackMessage(messageBody) {
+
+    const data = { "text" : messageBody };
+
+    fetch(process.env.SLACK_WEBHOOK, {
+        method: 'post',
+        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+}
+
 async function pushClasses() {
 
+    sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`);
     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`);
     fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`, (err) => {
         if (err) throw err;
     });
 
-    dateStart = moment().subtract(1, 'day').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
+    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
 
     //console.log(dateStart);
 
@@ -27,7 +42,7 @@ async function pushClasses() {
                 Key: process.env.API_KEY,
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
-                Filter: `cobalt_classbegindate<ge>${dateStart}`,
+                Filter: `createdon<ge>${dateStart}`,
                 Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode'
             }
 
@@ -50,15 +65,16 @@ async function pushClasses() {
 
             var modifiedData;
 
-            console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]Found ${data.length} starting formatting of .\n`);
-            fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`, (err) => {
+            sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
+            console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
+            fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`, (err) => {
                 if (err) throw err;
             });
 
 
+
             if (data.length > 0) {
 
-                console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
 
                 modifiedData = data.map(function (data) {
 
@@ -245,6 +261,7 @@ async function pushClasses() {
 
             }
 
+            sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${modifiedData.length} classes. Checking if classes exist in WordPress  \n`);
             resolve(modifiedData);
 
         })
@@ -253,7 +270,14 @@ async function pushClasses() {
             });
     });
 
+
     var data = await pullClasses;
+
+    
+    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`);
+    fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`, (err) => {
+        if (err) throw err;
+    });
 
     var existingClasses = [];
     var newClasses = [];
@@ -270,13 +294,18 @@ async function pushClasses() {
 
         });
 
-        var response = await checkIfExists;
+        try {
+            var response = await checkIfExists;
+        } catch (error) {
+            console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${error} \n`);
+        };
+        
         //console.log(data[i].cobalt_name);
         //console.log(response);
         //console.log(data[i].publish);
 
-        console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Checking ${data[i].cobalt_name} is already in WordPress. Publish: ${data[i].publish} Response: ${response} \n`);
-        fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Checking ${data[i].cobalt_name} is already in WordPress. Publish: ${data[i].publish} Response: ${response} \n`, (err) => {
+        console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Checking if "${data[i].cobalt_name} is already in WordPress." Hide_from_listing: ${data[i].publish} Response: ${response} \n`);
+        fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Checking if "${data[i].cobalt_name} is already in WordPress." Hide_from_listing: ${data[i].publish} Response: ${response} \n`, (err) => {
             if (err) throw err;
         });
 
@@ -299,8 +328,10 @@ async function pushClasses() {
 
     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`);
 
+    sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`);
 
-    //submitNewClass(newClasses);
+
+    submitNewClass(newClasses);
 
     function submitNewClass(data) {
         for (var i = 0; i < data.length; i++) {
@@ -335,9 +366,26 @@ async function pushClasses() {
                         },
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
-                        .then(body => fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${JSON.stringify(body)} \n`, (err) => {
-                            if (err) throw err;
-                        }));
+                        .then(body => {
+                            
+                            if("data" in body){
+
+                                sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`);
+
+                                fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`, (err) => {
+                                    if (err) throw err;
+                                })
+
+                            }else {
+
+                                sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`);
+
+                                fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`, (err) => {
+                                    if (err) throw err;
+                                })
+
+                            }
+                    });
                     console.log(`Class ${i + 1} out of ${data.length} new processed: ${data[i].cobalt_name}
                     `);
                     fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Class ${i + 1} out of ${data.length} new processed: ${data[i].cobalt_name} \n`, (err) => {

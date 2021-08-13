@@ -55,33 +55,33 @@ async function pushClasses() {
 
             prices = JSON.parse(prices);
 
-            console.log(orderId);
-
             orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
-
-            console.log(orderId);
 
             orderId = _.filter(orderId, (o) => o.id !== 'c3102913-ffd4-49d6-9bf6-5f0575b0b635');
 
-            console.log(orderId);
-
             orderId = _.filter(orderId, (o) => o.status === 1);
 
-            console.log(orderId);
-            
-            var cost = prices.filter(function (price) {
+            // console.log(orderId);
+            // console.log(orderId.length);
 
-                //console.log(orderId[0]);
+            if (orderId.length > 0) {
 
-                if (price.ProductId === orderId[0].id) {
-                    //console.log(price.Price);
-                    return price;
-                }
+                var cost = prices.filter(function (price) {
 
-            });
+                    //console.log(orderId[0]);
 
-            if (cost.length > 0) {
+                    if (price.ProductId === orderId[0].id) {
+                        //console.log(price.Price);
+                        return price;
+                    }
+
+                });
+
+                // console.log(data.cobalt_classId);
+                // console.log(cost);
+
                 data.cobalt_price = cost[0].Price;
+
             } else {
                 data.cobalt_price = '0.0000';
             }
@@ -348,8 +348,8 @@ async function pushClasses() {
                 Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
             },
             body: JSON.stringify(ramcoClass)
-        }).then(res => res.json()) // expecting a json response
-            .then(body => console.log(body));
+        }).then(res => console.log(res)) // expecting a json response
+            .then(body => body);
         console.log(`Class  processed: ${data[0].cobalt_name}`);
     }
 

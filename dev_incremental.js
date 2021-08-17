@@ -1,19 +1,21 @@
 var rp = require('request-promise');
 const fetch = require('node-fetch');
-var moment = require('moment');
+var momzent = require('moment');
 var moment = require('moment-timezone');
-var schedule = require('node-schedule');
+var cron = require('node-cron');
 require('dotenv').config();
 var fs = require('fs');
 var _ = require('lodash');
 
-var j = schedule.scheduleJob('30 * * * *', function () {
-    pushClasses();
-});
+// cron.schedule('30 * * * *', () => {
+//     pushClasses();
+// });
 
-async function pushClasses(){
+pushClasses();
 
-    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD"+`T`+"HH"+`:00:00`);
+async function pushClasses() {
+
+    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
 
     console.log(dateStart);
 
@@ -49,15 +51,15 @@ async function pushClasses(){
                 var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
 
                     var orderObject = {
-                        "id" : data.cobalt_productid.Value,
-                        "status" : data.statuscode.Value
+                        "id": data.cobalt_productid.Value,
+                        "status": data.statuscode.Value
                     }
-    
+
                     return orderObject;
-    
+
                 });
 
-                // console.log(data.cobalt_name);
+                //console.log(data);
 
 
                 var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });
@@ -69,21 +71,21 @@ async function pushClasses(){
                 orderId = _.filter(orderId, (o) => o.status === 1);
 
                 // console.log(orderId);
-                // console.log(orderId.length);
+                console.log(data.cobalt_classId);
 
-                if(orderId.length > 0) {
-                    
+                if (orderId.length > 0) {
+
                     var cost = prices.filter(function (price) {
-    
-                        //console.log(orderId[0]);
-    
+
+                        console.log(orderId[0]);
+
                         if (price.ProductId === orderId[0].id) {
                             //console.log(price.Price);
                             return price;
                         }
-    
-                    });
 
+                    });
+                    
                     data.cobalt_price = cost[0].Price;
 
                 } else {
@@ -231,7 +233,7 @@ async function pushClasses(){
     var existingClasses = [];
     var newClasses = [];
 
-    
+
     for (i = 0; i < data.length; i++) {
 
         var checkIfExists = new Promise(function (resolve, reject) {
@@ -239,7 +241,7 @@ async function pushClasses(){
             setTimeout(function () {
                 fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`)
                     .then(res => res.json())
-                    .then(function(json){
+                    .then(function (json) {
                         console.log(`checking class ${i + 1} of ${data.length}`);
                         resolve(json);
                     });
@@ -258,7 +260,7 @@ async function pushClasses(){
                 return data.name;
 
             });
-            
+
             var allTags = data[i].cobalt_cobalt_tag_cobalt_class.concat(responseTags);
 
             console.log(response.url);
@@ -269,13 +271,13 @@ async function pushClasses(){
 
             var filteredTags = allTags.filter((a, b) => allTags.indexOf(a) === b);
 
-            if (response.image.url === undefined){
+            if (response.image.url === undefined) {
 
                 data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
                 console.log(`No class image!`);
                 existingClasses.push(data[i]);
 
-            }else {
+            } else {
 
                 data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
                 data[i].featuredImage = response.image.url;
@@ -292,7 +294,7 @@ async function pushClasses(){
 
     console.log(`Found ${existingClasses.length} existing classes and discarding ${newClasses.length} new classes.`);
 
-    
+
     // console.log(newClasses);
     if (existingClasses.length > 0) {
         modifyExistingClass(existingClasses);

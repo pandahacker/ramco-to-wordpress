@@ -348,9 +348,27 @@ async function pushClasses() {
                 Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
             },
             body: JSON.stringify(ramcoClass)
-        }).then(res => console.log(res)) // expecting a json response
-            .then(body => body);
-        console.log(`Class  processed: ${data[0].cobalt_name}`);
+        }).then(res => res.json()) // expecting a json response
+            .then(body => {
+
+                if ("data" in body) {
+
+                    //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`);
+
+                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`, (err) => {
+                        if (err) throw err;
+                    })
+
+                } else {
+
+                    //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`);
+
+                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${body} \n`, (err) => {
+                        if (err) throw err;
+                    })
+
+                }
+            });
     }
 
 }

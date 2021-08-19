@@ -63,9 +63,11 @@ async function pushClasses(){
                 if (err) throw err;
             });
 
+            var modifiedData;
+
             if (data.length > 0) {
 
-                const modifiedData = data.map(function (data) {
+                modifiedData = data.map(function (data) {
 
                     var start = moment.tz(data.cobalt_ClassBeginDate.Display, 'Etc/GMT');
                     var end = moment.tz(data.cobalt_ClassEndDate.Display, 'Etc/GMT');

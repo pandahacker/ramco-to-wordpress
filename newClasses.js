@@ -7,7 +7,7 @@ require('dotenv').config();
 var fs = require('fs');
 var _ = require('lodash');
 
-cron.schedule('0 * * * *', () => {
+cron.schedule('0,*/30 * * * *', () => {
     pushClasses();
 });
 

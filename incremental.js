@@ -7,7 +7,7 @@ require('dotenv').config();
 var fs = require('fs');
 var _ = require('lodash');
 
-cron.schedule('30 * * * *', () => {
+cron.schedule('*/15,*/45 * * * *', () => {
     pushClasses();
 });
 
@@ -35,6 +35,7 @@ async function pushClasses(){
 
     dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD"+`T`+"HH"+`:00:00`);
 
+    console.log(dateStart);
 
     var pullClasses = new Promise(function (resolve, reject) {
         var options = {

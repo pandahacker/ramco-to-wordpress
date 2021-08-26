@@ -46,10 +46,10 @@ async function pushClasses() {
                 data = data.Data
             }
 
-            console.log(data);
+            //console.log(data);
 
             //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
-            console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
+            //console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
             fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`, (err) => {
                 if (err) throw err;
             });
@@ -76,15 +76,15 @@ async function pushClasses() {
 
             });
 
-            console.log(orderId);
+            //console.log(orderId);
 
             orderId = _.filter(orderId, (o) => o.status === 1);
 
             orderId = _.filter(orderId, (o) => o.cobalt_PublishtoPortal === 'true');
 
-            orderId = _.filter(orderId, (o) => o.cobalt_BeginDate < moment.tz('America/New_York').valueOf());
+            orderId = _.filter(orderId, (o) => o.cobalt_BeginDate < moment().unix());
 
-            console.log(orderId);
+            //console.log(orderId);
 
             var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });
 
@@ -125,7 +125,7 @@ async function pushClasses() {
 
             // console.log(`-------`);
 
-            data.cobalt_price = data.cobalt_price.slice(0, -2);s
+            data.cobalt_price = data.cobalt_price.slice(0, -2);
 
             const tags = data.cobalt_cobalt_tag_cobalt_meeting.map(function (data) {
 
@@ -162,7 +162,7 @@ async function pushClasses() {
             }
 
 
-            data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_meetingId}'" />`
+            data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FMeetings%2FRegistration%2FMeetingDetails.aspx%3Fmid%3D${data.cobalt_meetingId}'" />`
 
             data.cobalt_name = data.cobalt_name;
 
@@ -171,7 +171,7 @@ async function pushClasses() {
             //console.debug(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${JSON.stringify(data)} \n`);
 
             //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${modifiedData.length} classes. Checking if classes exist in WordPress  \n`);
-            resolve(modifiedData);
+            resolve(data);
 
         })
             .catch(function (err) {
@@ -181,7 +181,8 @@ async function pushClasses() {
 
 
     var data = await pullClasses;
-
+    
+    console.log(data);
 
     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`);
     fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`, (err) => {
@@ -189,42 +190,61 @@ async function pushClasses() {
     });
 
     var existingClasses = [];
+    var featuredClasses = [];
     var newClasses = [];
 
-    // for (i = 0; i < data.length; i++) {
+    var checkIfExists = new Promise(function (resolve, reject) {
 
-    //     var checkIfExists = new Promise(function (resolve, reject) {
+        setTimeout(function () {
+            fetch(`${process.env.WORDPRESS_URL}/by-slug/${data.cobalt_meetingId}`)
+                .then(res => res.json())
+                .then(function (json) {
+                    resolve(json);
+                });
+        }, 1000)
 
-    //         setTimeout(function () {
-    //             fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_meetingId}`)
-    //                 .then(res => resolve(res.status))
-    //                 .catch(err => reject(`Error: ${err}`));
-    //         }, 1000)
+    });
 
-    //     });
+    var response = await checkIfExists;
 
-    //     try {
-    //         var response = await checkIfExists;
-    //     } catch (error) {
-    //         console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${error} \n`);
-    //     };
+    console.log(response);
 
-    //     //console.log(data[i].cobalt_name);
-    //     //console.log(response);
-    //     //console.log(data[i].publish);
+    if (Number.isInteger(response.id)) {
 
-    //     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Checking if "${data[i].cobalt_name} is already in WordPress." Hide_from_listing: ${data[i].publish} Response: ${response} \n`);
-    //     fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Checking if "${data[i].cobalt_name} is already in WordPress." Hide_from_listing: ${data[i].publish} Response: ${response} \n`, (err) => {
-    //         if (err) throw err;
-    //     });
+        const responseTags = response.tags.map(function (data) {
 
-    //     if (response === 200 || response === 403) {
-    //         existingClasses.push(data[i]);
-    //     } else {
-    //         newClasses.push(data[i]);
-    //     }
+            return data.name;
 
-    // };
+        });
+
+        var allTags = data.cobalt_cobalt_tag_cobalt_meeting.concat(responseTags);
+
+        console.log(response.url);
+
+        //console.log(data[0].cobalt_cobalt_tag_cobalt_class);
+        //console.log(responseTags);
+        //console.log(allTags);
+
+        var filteredTags = allTags.filter((a, b) => allTags.indexOf(a) === b);
+
+        if (response.image.url === undefined) {
+
+            data.cobalt_cobalt_tag_cobalt_meeting = filteredTags;
+            console.log(`No class image!`);
+            existingClasses.push(data);
+
+        } else {
+
+            data.cobalt_cobalt_tag_cobalt_meeting = filteredTags;
+            data.featuredImage = response.image.url;
+            console.log(response.image.url);
+            featuredClasses.push(data);
+
+        }
+
+    } else {
+        newClasses.push(data);
+    }
 
 
 
@@ -235,75 +255,98 @@ async function pushClasses() {
         if (err) throw err;
     });
 
-    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`);
+    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes, ${existingClasses.length} existing classes, and ${featuredClasses.length} featured classes found  \n`);
 
     //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`);
 
+    if (existingClasses.length > 0) {
+        modifyExistingClass(existingClasses);
+    } else if (featuredClasses.length > 0) {
+        modifyFeaturedClass(featuredClasses);
+    }
 
-    //submitNewClass(newClasses);
 
-    function submitNewClass(data) {
-        for (var i = 0; i < data.length; i++) {
-            // for each iteration console.log a word
-            // and make a pause after it
-            (function (i) {
-                setTimeout(function () {
-                    var ramcoClass = {
-                        "title": data[i].cobalt_name,
-                        "status": "publish",
-                        "hide_from_listings": data[i].publish,
-                        "description": data[i].cobalt_Description,
-                        "all_day": data[i].all_day,
-                        "start_date": data[i].cobalt_BeginDate.Display,
-                        "end_date": data[i].cobalt_EndDate.Display,
-                        "slug": data[i].cobalt_meetingId,
-                        "categories": data[i].cobalt_cobalt_tag_cobalt_meeting,
-                        "show_map_link": true,
-                        "show_map": true,
-                        "cost": data[i].cobalt_price,
-                        "tags": data[i].cobalt_cobalt_tag_cobalt_meeting
+    function modifyExistingClass(data) {
+        var ramcoClass = {
+            "title": data[0].cobalt_name,
+            "status": "publish",
+            "hide_from_listings": data[0].publish,
+            "description": data[0].cobalt_Description,
+            "all_day": data[0].all_day,
+            "start_date": data[0].cobalt_BeginDate.Display,
+            "end_date": data[0].cobalt_EndDate.Display,
+            "slug": data[0].cobalt_meetingId,
+            "categories": data[0].cobalt_cobalt_tag_cobalt_meeting,
+            "show_map_link": true,
+            "show_map": true,
+            "cost": data[0].cobalt_price,
+            "tags": data[0].cobalt_cobalt_tag_cobalt_meeting
                         // "venue": {
                         //     "id": data[i].cobalt_Location
                         // }
-                    };
-
-                    fetch(process.env.WORDPRESS_URL, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
-                        },
-                        body: JSON.stringify(ramcoClass)
-                    }).then(res => res.json()) // expecting a json response
-                        .then(body => {
-
-                            if ("data" in body) {
-
-                                //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`);
-
-                                fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`, (err) => {
-                                    if (err) throw err;
-                                });
-
-                            } else {
-
-                                //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`);
-
-                                fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`, (err) => {
-                                    if (err) throw err;
-                                });
-
-                            }
-                        });
-                    console.log(`Class ${i + 1} out of ${data.length} new processed: ${data[i].cobalt_name}
-                    `);
-                    fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Class ${i + 1} out of ${data.length} new processed: ${data[i].cobalt_name} \n`, (err) => {
-                        if (err) throw err;
-                    });
-                }, 3000 * i);
-            })(i);
         };
 
+        fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[0].cobalt_meetingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
+            },
+            body: JSON.stringify(ramcoClass)
+        }).then(res => res.json()) // expecting a json response
+            .then(body => console.log(body));
+        console.log(`Class processed: ${data[0].cobalt_meetingId}`);
+    }
+
+    function modifyFeaturedClass(data) {
+        var ramcoClass = {
+            "title": data[0].cobalt_name,
+            "status": "publish",
+            "hide_from_listings": data[0].publish,
+            "description": data[0].cobalt_Description,
+            "image": data[0].featuredImage,
+            "all_day": data[0].all_day,
+            "start_date": data[0].cobalt_BeginDate.Display,
+            "end_date": data[0].cobalt_EndDate.Display,
+            "slug": data[0].cobalt_meetingId,
+            "categories": data[0].cobalt_cobalt_tag_cobalt_meeting,
+            "show_map_link": true,
+            "show_map": true,
+            "cost": data[0].cobalt_price,
+            "tags": data[0].cobalt_cobalt_tag_cobalt_meeting
+                        // "venue": {
+                        //     "id": data[i].cobalt_Location
+                        // }            
+        };
+
+        fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[0].cobalt_meetingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: 'Basic ' + Buffer.from(process.env.WORDPRESS_CREDS).toString('base64')
+            },
+            body: JSON.stringify(ramcoClass)
+        }).then(res => res.json()) // expecting a json response
+            .then(body => {
+
+                if ("data" in body) {
+
+                    //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`);
+
+                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} failed because of "${body.message}" \n`, (err) => {
+                        if (err) throw err;
+                    })
+
+                } else {
+
+                    //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`);
+
+                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} submitted successfully \n ${body} \n`, (err) => {
+                        if (err) throw err;
+                    })
+
+                }
+            });
     }
 
 }

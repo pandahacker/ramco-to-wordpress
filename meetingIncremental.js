@@ -7,11 +7,11 @@ var fs = require('fs');
 var _ = require('lodash');
 const prompt = require('prompt-sync')();
 
-// cron.schedule('15 * * * *', () => {
-//     pushClasses();
-// });
+cron.schedule('45 * * * *', () => {
+    pushClasses();
+});
 
-pushClasses();
+//pushClasses();
 
 async function pushClasses() {
 

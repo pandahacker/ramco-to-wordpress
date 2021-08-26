@@ -7,11 +7,11 @@ require('dotenv').config();
 var fs = require('fs');
 var _ = require('lodash');
 
-// cron.schedule('15 * * * *', () => {
-//     pushClasses();
-// });
+cron.schedule('15 * * * *', () => {
+    pushClasses();
+});
 
-pushClasses();
+//pushClasses();
 
 async function pushClasses() {
 
@@ -164,54 +164,6 @@ async function pushClasses() {
 
                     }
 
-
-                    // switch (data.cobalt_LocationId.Display) {
-                    //     case "MIAMI HQ":
-                    //         data.cobalt_name = `<span style="color:#798e2d;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 4694;
-                    //         break;
-
-                    //     case "West Broward - Sawgrass Office":
-                    //         data.cobalt_name = `<span style="color:#0082c9;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 4698;
-                    //         break;
-
-                    //     case "Coral Gables Office":
-                    //         data.cobalt_name = `<span style="color:#633e81;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 4696;
-                    //         break;
-
-                    //     case "JTHS - MIAMI Training Room (Jupiter)":
-                    //         data.cobalt_name = `<span style="color:#005962;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 4718;
-                    //         break;
-
-                    //     case "Northwestern Dade":
-                    //         data.cobalt_name = `<span style="color:#9e182f;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 4735;
-                    //         break;
-
-                    //     case "Northwestern Dade Office":
-                    //         data.cobalt_name = `<span style="color:#9e182f;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 4735;
-                    //         break;
-
-                    //     case "NE Broward Office-Ft. Lauderdale":
-                    //         data.cobalt_name = `<span style="color:#f26722;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 4702;
-                    //         break;
-
-                    //     case "Aventura Office":
-                    //         data.cobalt_name = `<span style="color:#000000;">${data.cobalt_name}</span>`;
-                    //         data.locationId = 22099;
-                    //         break;
-
-                    //     default:
-                    //         data.cobalt_name = data.cobalt_name;
-                    // }
-
-                    //console.log(data.cobalt_LocationId.Display);
-                    //console.log(data.cobalt_LocationId.Value);
 
                     data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_meetingId}'" />`
 

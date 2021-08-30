@@ -12,13 +12,11 @@ cron.schedule('45 * * * *', () => {
     pushClasses();
 });
 
-//pushClasses();
+// pushClasses();
 
 async function pushClasses() {
 
-    const classGuid = prompt('Meeting GUID: ');
-
-    console.log(classGuid);
+    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD" + `T` + "HH" + `:45:00`);
 
     var pullClasses = new Promise(function (resolve, reject) {
         var options = {
@@ -26,9 +24,9 @@ async function pushClasses() {
             uri: process.env.API_URL,
             formData: {
                 Key: process.env.API_KEY,
-                Operation: 'GetEntity',
+                Operation: 'GetEntities',
                 Entity: 'cobalt_meeting',
-                Guid: classGuid,
+                Filter: `modifiedon<ge>${dateStart}`,
                 Attributes: 'cobalt_begindate,cobalt_enddate,cobalt_meetingid,cobalt_location,cobalt_name,cobalt_description,cobalt_cobalt_tag_cobalt_meeting/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_productid,cobalt_outsideprovider,cobalt_meeting_cobalt_meetingregistrationfees/statuscode, cobalt_meeting_cobalt_meetingregistrationfees/cobalt_publishtoportal, cobalt_meeting_cobalt_meetingregistrationfees/cobalt_begindate, cobalt_meeting_cobalt_meetingregistrationfees/cobalt_enddate, createdon, modifiedon'
             }
 
@@ -49,7 +47,7 @@ async function pushClasses() {
 
             var modifiedData;
 
-            sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
+            //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
             console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
             fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`, (err) => {
                 if (err) throw err;

@@ -204,9 +204,10 @@ async function pushClasses() {
         var checkIfExists = new Promise(function (resolve, reject) {
 
             setTimeout(function () {
-                fetch(`${process.env.WORDPRESS_URL}/by-slug/${data.cobalt_meetingId}`)
+                fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_meetingId}`)
                     .then(res => res.json())
                     .then(function (json) {
+                        console.log(json);
                         resolve(json);
                     });
             }, 1000)

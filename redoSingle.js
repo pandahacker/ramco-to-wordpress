@@ -355,7 +355,7 @@ async function pushClasses() {
 
                     //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`);
 
-                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`, (err) => {
+                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} failed because of "${body.message}" \n`, (err) => {
                         if (err) throw err;
                     })
 
@@ -363,7 +363,7 @@ async function pushClasses() {
 
                     //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`);
 
-                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${body} \n`, (err) => {
+                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} submitted successfully \n ${body} \n`, (err) => {
                         if (err) throw err;
                     })
 

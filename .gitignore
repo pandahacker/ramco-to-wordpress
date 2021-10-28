@@ -12,7 +12,7 @@ pricelist.json
 results.json
 
 # Enviroment Variables
-.env
+.env*
 .vscode
 
 #dev_files

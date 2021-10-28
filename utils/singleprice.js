@@ -2,7 +2,7 @@ var rp = require('request-promise');
 const fetch = require('node-fetch');
 var schedule = require('node-schedule');
 const prompt = require('prompt-sync')();
-require('dotenv').config();
+require('custom-env').env();
 var fs = require('fs');
 
 async function pullPricing() {

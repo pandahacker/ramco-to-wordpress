@@ -1,6 +1,6 @@
 var rp = require('request-promise');
 const fetch = require('node-fetch');
-require('dotenv').config();
+require('custom-env').env();
 var fs = require('fs');
 
 const path = './pricelist.json'

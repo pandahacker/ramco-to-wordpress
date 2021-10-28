@@ -9,6 +9,7 @@
   "author": "Blake Albertson",
   "license": "ISC",
   "dependencies": {
+    "custom-env": "^2.0.1",
     "dotenv": "^8.0.0",
     "lodash": "^4.17.21",
     "moment": "^2.24.0",

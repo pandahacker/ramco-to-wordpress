@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 var moment = require('moment');
 var moment = require('moment-timezone');
 var cron = require('node-cron');
-require('dotenv').config();
+require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
 const prompt = require('prompt-sync')();

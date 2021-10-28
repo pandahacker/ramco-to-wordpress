@@ -15,7 +15,7 @@ pushClasses();
 
 async function pushClasses() {
 
-    fs.appendFile('logs.txt', `[${moment().format('h:mm:ss a')}] RAMCO to WordPress Sync started.  \n`, (err) => {
+    fs.appendFile('logs/logs.txt', `[${moment().format('h:mm:ss a')}] RAMCO to WordPress Sync started.  \n`, (err) => {
         if (err) throw err;
     });
 
@@ -215,7 +215,7 @@ async function pushClasses() {
 
             data.cobalt_cobalt_tag_cobalt_class = tags;
 
-            fs.appendFile('apiData.json', `[${moment().format('h:mm:ss a')}] ${JSON.stringify(data)} \n`, (err) => {
+            fs.appendFile('logs/apiData.json', `[${moment().format('h:mm:ss a')}] ${JSON.stringify(data)} \n`, (err) => {
                 if (err) throw err;
             })
 
@@ -254,7 +254,7 @@ async function pushClasses() {
     //     //console.log(response);
     //     //console.log(data[i].publish);
 
-    //     fs.appendFile('logs.txt', `[${moment().format('h:mm:ss a')}] Searching ${data.cobalt_name} with result of ${response}. Publish: ${data.publish}  \n`, (err) => {
+    //     fs.appendFile('logs/logs.txt', `[${moment().format('h:mm:ss a')}] Searching ${data.cobalt_name} with result of ${response}. Publish: ${data.publish}  \n`, (err) => {
     //         if (err) throw err;
     //     });
 
@@ -271,13 +271,13 @@ async function pushClasses() {
     //console.log(existingClasses.length);
     //console.log(newClasses.length);
 
-    fs.appendFile('logs.txt', `[${moment().format('h:mm:ss a')}] Total classes found: ${data.length} with ${newClasses.length} new classes and ${existingClasses.length} existing classes  \n`, (err) => {
+    fs.appendFile('logs/logs.txt', `[${moment().format('h:mm:ss a')}] Total classes found: ${data.length} with ${newClasses.length} new classes and ${existingClasses.length} existing classes  \n`, (err) => {
         if (err) throw err;
     });
 
     console.log(`Found ${newClasses.length} new classes. Discarding ${existingClasses.length} existing classes.`);
 
-    fs.appendFile('logs.txt', `Found ${newClasses.length} new classes.Discarding ${existingClasses.length} existing classes. \n`, (err) => {
+    fs.appendFile('logs/logs.txt', `Found ${newClasses.length} new classes.Discarding ${existingClasses.length} existing classes. \n`, (err) => {
         if (err) throw err;
     });
 
@@ -315,12 +315,12 @@ async function pushClasses() {
             },
             body: JSON.stringify(ramcoClass)
         }).then(res => res.json()) // expecting a json response
-            .then(body => fs.appendFile('results.json', `[${moment().format('h:mm:ss a')}] ${JSON.stringify(body)} \n`, (err) => {
+            .then(body => fs.appendFile('logs/results.json', `[${moment().format('h:mm:ss a')}] ${JSON.stringify(body)} \n`, (err) => {
                 if (err) throw err;
             }));
         console.log(`Class processed: ${data.cobalt_name}
         `);
-        fs.appendFile('logs.txt', `[${moment().format('h:mm:ss a')}] Class processed: ${data.cobalt_name} \n`, (err) => {
+        fs.appendFile('logs/logs.txt', `[${moment().format('h:mm:ss a')}] Class processed: ${data.cobalt_name} \n`, (err) => {
             if (err) throw err;
         });
     }

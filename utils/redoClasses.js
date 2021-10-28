@@ -215,7 +215,7 @@ async function pushClasses() {
 
                 data.cobalt_cobalt_tag_cobalt_class = tags;
 
-                fs.appendFile('apiData.json', `[${moment().format('h:mm:ss a')}] ${JSON.stringify(data)} \n`, (err) => {
+                fs.appendFile('logs/apiData.json', `[${moment().format('h:mm:ss a')}] ${JSON.stringify(data)} \n`, (err) => {
                     if (err) throw err;
                 })
 
@@ -342,7 +342,7 @@ async function pushClasses() {
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
                         .then(body => {
-                            fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${JSON.stringify(body)} \n`, (err) => {
+                            fs.appendFile('logs/results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${JSON.stringify(body)} \n`, (err) => {
                                 if (err) throw err;
                             })
                             console.log(`${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`)
@@ -389,7 +389,7 @@ async function pushClasses() {
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
                         .then(body => {
-                            fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${JSON.stringify(body)} \n`, (err) => {
+                            fs.appendFile('logs/results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${JSON.stringify(body)} \n`, (err) => {
                                 if (err) throw err;
                             })
                             console.log(`${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`)

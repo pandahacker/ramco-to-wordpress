@@ -12,7 +12,7 @@ pushClasses();
 async function pushClasses() {
 
     console.log(`[${moment().format('h:mm:ss a')}] RAMCO to WordPress Sync started.  \n`);
-    fs.appendFile('newClasses.log', `[${moment().format('h:mm:ss a')}]RAMCO to WordPress Sync started.\n`, (err) => {
+    fs.appendFile('logs/newClasses.log', `[${moment().format('h:mm:ss a')}]RAMCO to WordPress Sync started.\n`, (err) => {
         if (err) throw err;
     });
 

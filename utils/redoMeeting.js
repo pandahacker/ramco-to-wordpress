@@ -50,7 +50,7 @@ async function pushClasses() {
 
             //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
             //console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
-            fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`, (err) => {
+            fs.appendFile('logs/newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`, (err) => {
                 if (err) throw err;
             });
 
@@ -185,7 +185,7 @@ async function pushClasses() {
     console.log(data);
 
     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`);
-    fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`, (err) => {
+    fs.appendFile('logs/newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`, (err) => {
         if (err) throw err;
     });
 
@@ -251,7 +251,7 @@ async function pushClasses() {
     //console.log(existingClasses.length);
     //console.log(newClasses.length);
 
-    fs.appendFile('newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`, (err) => {
+    fs.appendFile('logs/newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`, (err) => {
         if (err) throw err;
     });
 
@@ -333,7 +333,7 @@ async function pushClasses() {
 
                     //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} failed because of "${body.message}" \n`);
 
-                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} failed because of "${body.message}" \n`, (err) => {
+                    fs.appendFile('logs/results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} failed because of "${body.message}" \n`, (err) => {
                         if (err) throw err;
                     })
 
@@ -341,7 +341,7 @@ async function pushClasses() {
 
                     //sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`);
 
-                    fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} submitted successfully \n ${body} \n`, (err) => {
+                    fs.appendFile('logs/results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[0].cobalt_name} submitted successfully \n ${body} \n`, (err) => {
                         if (err) throw err;
                     })
 

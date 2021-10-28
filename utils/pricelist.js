@@ -40,7 +40,7 @@ function pullPricing() {
 
         var stringData = JSON.stringify(modifiedData);
 
-        fs.writeFile('pricelist.json', stringData, (err) => {
+        fs.writeFile('../pricelist.json', stringData, (err) => {
             if (err) throw err;
             console.log('The file has been saved!');
         });

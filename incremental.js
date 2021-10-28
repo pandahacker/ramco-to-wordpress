@@ -7,9 +7,15 @@ require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
 
-cron.schedule(`${process.env.INCREMENTAL} * * * *`, () => {
-    pushClasses();
-});
+if(process.env.STAGING === 'true'){
+    cron.schedule('30 * * * *', () => {
+        pushClasses();
+    });
+}else{
+    cron.schedule('45 * * * *', () => {
+        pushClasses();
+    });
+}
 
 function sendSlackMessage(messageBody) {
 

@@ -7,7 +7,7 @@ require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
 
-cron.schedule('0 * * * *', () => {
+cron.schedule(`${process.env.INCREMENTAL} * * * *`, () => {
     pushClasses();
 });
 

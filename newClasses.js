@@ -93,6 +93,8 @@ async function pushClasses() {
 
                     var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
 
+                        console.log(data);
+
                         var orderObject = {
                             "id": data.cobalt_productid.Value,
                             "status": data.statuscode.Value

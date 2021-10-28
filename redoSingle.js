@@ -34,6 +34,8 @@ async function pushClasses() {
 
             var data = body.Data
 
+            console.log(data);
+
             var start = moment.tz(data.cobalt_ClassBeginDate.Display, 'Etc/GMT');
             var end = moment.tz(data.cobalt_ClassEndDate.Display, 'Etc/GMT');
 

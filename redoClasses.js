@@ -4,6 +4,7 @@ var moment = require('moment');
 var moment = require('moment-timezone');
 require('dotenv').config();
 var fs = require('fs');
+var _ = require('lodash');
 
 pushClasses();
 
@@ -24,7 +25,7 @@ async function pushClasses() {
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
                 Filter: `cobalt_classbegindate<ge>${dateStart}`,
-                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid'
+                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode, modifiedon'
             }
 
         }
@@ -44,9 +45,17 @@ async function pushClasses() {
                 data.cobalt_ClassBeginDate.Display = start.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
                 data.cobalt_ClassEndDate.Display = end.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
 
-                const orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
+                console.log(data.cobalt_classId);
+                
+                var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
+                    console.log(data);
 
-                    return data.cobalt_productid.Value;
+                    var orderObject = {
+                        "id": data.cobalt_productid.Value,
+                        "status": data.statuscode.Value
+                    }
+
+                    return orderObject;
 
                 });
 
@@ -54,24 +63,46 @@ async function pushClasses() {
 
                 prices = JSON.parse(prices);
 
-                var cost = prices.filter(function (price) {
+                console.log(orderId);
 
-                    //console.log(orderId[0]);
+                orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
 
-                    if (price.ProductId === orderId[0]) {
-                        //console.log(price.Price);
-                        return price;
-                    }
+                console.log(orderId);
 
-                });
+                orderId = _.filter(orderId, (o) => o.id !== 'c3102913-ffd4-49d6-9bf6-5f0575b0b635');
 
-                if (cost.length > 0) {
+                console.log(orderId);
+
+                orderId = _.filter(orderId, (o) => o.status === 1);
+
+                console.log(orderId);
+                // console.log(orderId.length);
+
+                if (orderId.length > 0) {
+
+                    var cost = prices.filter(function (price) {
+
+                        //console.log(orderId[0]);
+
+                        if (price.ProductId === orderId[0].id) {
+                            //console.log(price.Price);
+                            return price;
+                        }
+
+                    });
+
+                    // console.log(data.cobalt_classId);
+                    // console.log(cost);
+
                     data.cobalt_price = cost[0].Price;
+
                 } else {
                     data.cobalt_price = '0.0000';
                 }
 
                 data.cobalt_price = data.cobalt_price.slice(0, -2);
+
+                console.log(data.cobalt_price);
 
                 const tags = data.cobalt_cobalt_tag_cobalt_class.map(function (data) {
 
@@ -310,8 +341,13 @@ async function pushClasses() {
                         },
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
-                        .then(body => console.log(body));
-                    console.log(`Class ${i + 1} out of ${data.length} existing processed: ${data[i].cobalt_name}`);
+                        .then(body => {
+                            fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${JSON.stringify(body)} \n`, (err) => {
+                                if (err) throw err;
+                            })
+                            console.log(`${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`)
+
+                        });
 
                 }, 3000 * i);
             })(i);
@@ -352,8 +388,13 @@ async function pushClasses() {
                         },
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
-                        .then(body => console.log(body));
-                    console.log(`Class ${i + 1} out of ${data.length} existing processed: ${data[i].cobalt_name}`);
+                        .then(body => {
+                            fs.appendFile('results.json', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n ${JSON.stringify(body)} \n`, (err) => {
+                                if (err) throw err;
+                            })
+                            console.log(`${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_name} submitted successfully \n`)
+
+                        });
 
                 }, 3000 * i);
             })(i);

@@ -52,7 +52,7 @@ async function pushClasses(){
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
                 Filter: `modifiedon<ge>${dateStart}`,
-                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode'
+                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode,cobalt_outsideprovider,cobalt_outsideproviderlink'
             }
 
         }
@@ -131,6 +131,10 @@ async function pushClasses(){
                     // console.log(`-------`);
 
                     data.cobalt_price = data.cobalt_price.slice(0, -2);
+
+                    if(data.cobalt_OutsideProvider){
+                        data.cobalt_price = ' ';
+                    }
 
                     const tags = data.cobalt_cobalt_tag_cobalt_class.map(function (data) {
 
@@ -215,28 +219,34 @@ async function pushClasses(){
                     //console.log(data.cobalt_LocationId.Display);
                     //console.log(data.cobalt_LocationId.Value);
 
-                    if (data.cobalt_cobalt_classinstructor_cobalt_class.length > 0) {
-
-                        //console.log(data.cobalt_cobalt_classinstructor_cobalt_class);
-
-                        const classInstructor = data.cobalt_cobalt_classinstructor_cobalt_class.map(function (data) {
-
-                            return data.cobalt_name;
-
-                        });
-
-                        //console.log(classInstructor[0]);
-
-                        data.cobalt_Description = `<p style="font-weight:bold;color: black;">Instructor: ${classInstructor[0]}</p><br><br>${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_classId}'" />`
-
-                        //console.log(data.cobalt_Description);
-
-                    } else {
-
+                    if(data.cobalt_OutsideProvider){
+                        data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='${data.cobalt_OutsideProviderLink}'" />`
+                    }else{
                         data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_classId}'" />`
-
+                    }
+        
+                    if (data.cobalt_cobalt_classinstructor_cobalt_class.length > 0) {
+        
+                        //console.log(data.cobalt_cobalt_classinstructor_cobalt_class);
+        
+                        const classInstructor = data.cobalt_cobalt_classinstructor_cobalt_class.map(function (data) {
+        
+                            return data.cobalt_name;
+        
+                        });
+        
+                        //console.log(classInstructor[0]);
+        
+                        data.cobalt_Description = `<p style="font-weight:bold;color: black;">Instructor: ${classInstructor[0]}</p><br><br>${data.cobalt_Description}`
+        
                         //console.log(data.cobalt_Description);
-
+        
+                    } else {
+        
+                        data.cobalt_Description = `${data.cobalt_Description}`
+        
+                        //console.log(data.cobalt_Description);
+        
                     }
 
                     data.cobalt_name = data.cobalt_name;

@@ -132,7 +132,7 @@ async function pushClasses(){
 
                     data.cobalt_price = data.cobalt_price.slice(0, -2);
 
-                    if(data.cobalt_OutsideProvider){
+                    if(data.cobalt_OutsideProvider === 'true'){
                         data.cobalt_price = ' ';
                     }
 
@@ -219,7 +219,7 @@ async function pushClasses(){
                     //console.log(data.cobalt_LocationId.Display);
                     //console.log(data.cobalt_LocationId.Value);
 
-                    if(data.cobalt_OutsideProvider){
+                    if(data.cobalt_OutsideProvider === 'true'){
                         data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='${data.cobalt_OutsideProviderLink}'" />`
                     }else{
                         data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_classId}'" />`

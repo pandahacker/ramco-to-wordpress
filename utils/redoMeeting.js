@@ -127,6 +127,10 @@ async function pushClasses() {
 
             data.cobalt_price = data.cobalt_price.slice(0, -2);
 
+            if(data.cobalt_OutsideProvider === 'true'){
+                data.cobalt_price = ' ';
+            }
+
             const tags = data.cobalt_cobalt_tag_cobalt_meeting.map(function (data) {
 
                 var tags = {

@@ -30,7 +30,7 @@ async function pushClasses() {
                 Operation: 'GetEntities',
                 Entity: 'cobalt_meeting',
                 Filter: `cobalt_BeginDate<ge>${dateStart}`,
-                Attributes: 'cobalt_BeginDate,cobalt_EndDate,cobalt_meetingId,cobalt_location,cobalt_name,cobalt_description,cobalt_cobalt_tag_cobalt_meeting/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_productid,cobalt_outsideprovider,cobalt_meeting_cobalt_meetingregistrationfees/statuscode'
+                Attributes: 'cobalt_BeginDate,cobalt_EndDate,cobalt_meetingId,cobalt_location,cobalt_name,cobalt_description,cobalt_cobalt_tag_cobalt_meeting/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_productid,cobalt_outsideprovider,cobalt_meeting_cobalt_meetingregistrationfees/statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_publishtoportal'
             }
 
         }
@@ -77,7 +77,8 @@ async function pushClasses() {
 
                         var orderObject = {
                             "id": data.cobalt_productid.Value,
-                            "status": data.statuscode.Value
+                            "status": data.statuscode.Value,
+                            "portal": data.cobalt_PublishtoPortal
                         }
 
                         return orderObject;
@@ -89,6 +90,8 @@ async function pushClasses() {
                     var prices = fs.readFileSync('./pricelist.json', { encoding: 'utf8', flag: 'r' });
 
                     prices = JSON.parse(prices);
+
+                    orderId = _.filter(orderId, (o) => o.portal !== 'false');
 
                     orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
 
@@ -129,6 +132,10 @@ async function pushClasses() {
                     // console.log(`-------`);
 
                     data.cobalt_price = data.cobalt_price.slice(0, -2);
+
+                    if(data.cobalt_OutsideProvider === 'true'){
+                        data.cobalt_price = ' ';
+                    }
 
                     const tags = data.cobalt_cobalt_tag_cobalt_meeting.map(function (data) {
 

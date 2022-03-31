@@ -52,7 +52,7 @@ async function pushClasses() {
 
 
                 modifiedData = data.map(function (data) {
-
+                    console.log(data.cobalt_classId);
                     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatting ${data.cobalt_name}  \n`);
 
                     var start = moment.tz(data.cobalt_ClassBeginDate.Display, 'Etc/GMT');

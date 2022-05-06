@@ -24,7 +24,7 @@ async function pushClasses() {
                 Operation: 'GetEntity',
                 Entity: 'cobalt_class',
                 Guid: classGuid,
-                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode'
+                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode,cobalt_outsideprovider,cobalt_outsideproviderlink'
             }
 
         }
@@ -91,6 +91,10 @@ async function pushClasses() {
             data.cobalt_price = data.cobalt_price.slice(0, -2);
 
             console.log(data.cobalt_price);
+
+            if(data.cobalt_OutsideProvider === 'true'){
+                data.cobalt_price = ' ';
+            }
 
             const tags = data.cobalt_cobalt_tag_cobalt_class.map(function (data) {
 

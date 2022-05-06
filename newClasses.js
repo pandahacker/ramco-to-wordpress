@@ -54,7 +54,7 @@ async function pushClasses() {
                 Key: process.env.API_KEY,
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
-                Filter: `createdon<ge>${dateStart}`,
+                Filter: `createdon<ge>${dateStart} AND statuscode<eq>1`,
                 Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode,cobalt_outsideprovider,cobalt_outsideproviderlink,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_publishtoportal'
             }
 

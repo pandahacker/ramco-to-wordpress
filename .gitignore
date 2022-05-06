@@ -11,6 +11,8 @@ logs.txt
 pricelist.json
 results.json
 
+.DS_Store
+
 # Enviroment Variables
 .env*
 .vscode

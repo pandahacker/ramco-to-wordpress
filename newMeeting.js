@@ -29,7 +29,7 @@ async function pushClasses() {
                 Key: process.env.API_KEY,
                 Operation: 'GetEntities',
                 Entity: 'cobalt_meeting',
-                Filter: `cobalt_BeginDate<ge>${dateStart}`,
+                Filter: `cobalt_BeginDate<ge>${dateStart} AND statuscode<eq>1`,
                 Attributes: 'cobalt_BeginDate,cobalt_EndDate,cobalt_meetingId,cobalt_location,cobalt_name,cobalt_description,cobalt_cobalt_tag_cobalt_meeting/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_productid,cobalt_outsideprovider,cobalt_meeting_cobalt_meetingregistrationfees/statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_publishtoportal'
             }
 

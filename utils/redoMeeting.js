@@ -168,8 +168,8 @@ async function pushClasses() {
 
             if(data.cobalt_OutsideProvider === 'true'){
                 data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='${data.cobalt_OutsideProviderLink}'" />`
-            }else{
-                data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_classId}'" />`
+            }else if(data.cobalt_OutsideProvider === 'false'){
+                data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FMeetings%2FRegistration%2FMeetingDetails.aspx%3Fmid%3D${data.cobalt_meetingId}'" />`
             }
 
             data.cobalt_name = data.cobalt_name;
@@ -190,7 +190,7 @@ async function pushClasses() {
 
     var data = await pullClasses;
     
-    console.log(data);
+    //console.log(data);
 
     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`);
     fs.appendFile('logs/newClasses.log', `[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`, (err) => {
@@ -215,7 +215,7 @@ async function pushClasses() {
 
     var response = await checkIfExists;
 
-    console.log(response);
+    //console.log(response);
 
     if (Number.isInteger(response.id)) {
 
@@ -302,7 +302,9 @@ async function pushClasses() {
             },
             body: JSON.stringify(ramcoClass)
         }).then(res => res.json()) // expecting a json response
-            .then(body => console.log(body));
+            .then(body => {
+                //console.log(body)
+            });
         console.log(`Class processed: ${data[0].cobalt_meetingId}`);
     }
 

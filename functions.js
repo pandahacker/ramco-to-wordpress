@@ -30,11 +30,11 @@ function sendDiscordMessage(errorType, errorMessage, classUrl) {
               {
                 "name": "Error Message",
                 "value": errorMessage
-              },
-              {
-                "name": "Class URL",
-                "value": `https://miamicrm.ramcoams.org/main.aspx?etn=cobalt_class&id={${classUrl}}&newWindow=true&pagetype=entityrecord`
               }
+              // {
+              //   "name": "Class URL",
+              //   "value": `https://miamicrm.ramcoams.org/main.aspx?etn=cobalt_class&id={${classUrl}}&newWindow=true&pagetype=entityrecord`
+              // }
             ]
           }
         ],

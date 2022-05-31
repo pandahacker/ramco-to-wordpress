@@ -6,29 +6,24 @@ var cron = require('node-cron');
 require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
+var { sendSlackMessage, sendDiscordMessage } = require('./functions.js');
 
 if(process.env.STAGING === 'true'){
     cron.schedule('30 * * * *', () => {
-        pushClasses();
+        try{
+            pushClasses();
+        }catch(err){
+            sendDiscordMessage(err.name, err.message);
+        }
     });
 }else{
     cron.schedule('45 * * * *', () => {
-        pushClasses();
-    });
-}
-
-function sendSlackMessage(messageBody) {
-
-    const data = { "text": messageBody };
-
-    fetch(process.env.SLACK_WEBHOOK, {
-        method: 'post',
-        body: JSON.stringify(data),
-        headers: {
-            "Content-Type": "application/json"
+        try{
+            pushClasses();
+        }catch(err){
+            sendDiscordMessage(err.name, err.message);
         }
     });
-
 }
 
 async function pushClasses(){

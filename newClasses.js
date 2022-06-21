@@ -6,7 +6,7 @@ var cron = require('node-cron');
 require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
-import { sendDiscordMessage, sendDiscordMessage } from './functions.js';
+var { sendSlackMessage, sendDiscordMessage } = require('./functions.js');
 
 if(process.env.STAGING === 'true' ){
     cron.schedule('00 * * * *', () => {

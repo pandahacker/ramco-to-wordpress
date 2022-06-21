@@ -6,6 +6,7 @@ var cron = require('node-cron');
 require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
+import { sendDiscordMessage, sendDiscordMessage } from './functions.js';
 
 if(process.env.STAGING === 'true' ){
     cron.schedule('00 * * * *', () => {
@@ -20,19 +21,19 @@ if(process.env.STAGING === 'true' ){
 
 //pushClasses();
 
-function sendSlackMessage(messageBody) {
+// function sendSlackMessage(messageBody) {
 
-    const data = { "text": messageBody };
+//     const data = { "text": messageBody };
 
-    fetch(process.env.SLACK_WEBHOOK, {
-        method: 'post',
-        body: JSON.stringify(data),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
+//     fetch(process.env.SLACK_WEBHOOK, {
+//         method: 'post',
+//         body: JSON.stringify(data),
+//         headers: {
+//             "Content-Type": "application/json"
+//         }
+//     });
 
-}
+// }
 
 async function pushClasses() {
 
@@ -126,7 +127,7 @@ async function pushClasses() {
                     // console.log(orderId);
                     // console.log(orderId.length);
 
-                    if (orderId.length > 0) {
+                    if (orderId.length > 0  && orderId[0].id !== null) {
 
                         var cost = prices.filter(function (price) {
 
@@ -143,6 +144,11 @@ async function pushClasses() {
                         // console.log(cost);
 
                         data.cobalt_price = cost[0].Price;
+
+                    } if (orderId.length > 0 && orderId[0].id === null) {
+    
+                        sendDiscordMessage('Price not found', 'order id has null value type', data.cobalt_classId);
+                        data.cobalt_price = '';
 
                     } else {
                         data.cobalt_price = '0.0000';

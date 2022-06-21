@@ -102,20 +102,28 @@ async function pushClasses(){
                     // console.log(orderId);
                     // console.log(orderId.length);
 
-                    if(orderId.length > 0) {
-                        
+                    if (orderId.length > 0  && orderId[0].id !== null) {
+
                         var cost = prices.filter(function (price) {
-        
+
                             //console.log(orderId[0]);
-        
+
                             if (price.ProductId === orderId[0].id) {
                                 //console.log(price.Price);
                                 return price;
                             }
-        
+
                         });
 
+                        // console.log(data.cobalt_classId);
+                        // console.log(cost);
+
                         data.cobalt_price = cost[0].Price;
+
+                    } if (orderId.length > 0 && orderId[0].id === null) {
+    
+                        sendDiscordMessage('Price not found', 'order id has null value type', data.cobalt_classId);
+                        data.cobalt_price = '';
 
                     } else {
                         data.cobalt_price = '0.0000';

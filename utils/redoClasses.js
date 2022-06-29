@@ -81,6 +81,8 @@ async function pushClasses() {
                     orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
 
                     orderId = _.filter(orderId, (o) => o.id !== 'c3102913-ffd4-49d6-9bf6-5f0575b0b635');
+                    
+                    orderId = _.filter(orderId, (o) => o.id !== null);
 
                     orderId = _.filter(orderId, (o) => o.status === 1);
 
@@ -367,7 +369,7 @@ async function pushClasses() {
 
                         });
 
-                }, 3000 * i);
+                }, 10000 * i);
             })(i);
         };
     }
@@ -414,7 +416,7 @@ async function pushClasses() {
 
                         });
 
-                }, 3000 * i);
+                }, 10000 * i);
             })(i);
         };
     }

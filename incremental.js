@@ -97,12 +97,21 @@ async function pushClasses(){
 
                     orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
 
+                    orderId = _.filter(orderId, function(o){
+                        
+                        if (o.id === null){
+                        sendDiscordMessage('Price not found', 'order id has null value type', data.cobalt_classId);
+                        }
+
+                        return o.id !== null;
+                    });
+
                     orderId = _.filter(orderId, (o) => o.status === 1);
 
                     // console.log(orderId);
                     // console.log(orderId.length);
 
-                    if (orderId.length > 0  && orderId[0].id !== null) {
+                    if (orderId.length > 0) {
 
                         var cost = prices.filter(function (price) {
 
@@ -119,11 +128,6 @@ async function pushClasses(){
                         // console.log(cost);
 
                         data.cobalt_price = cost[0].Price;
-
-                    } if (orderId.length > 0 && orderId[0].id === null) {
-    
-                        sendDiscordMessage('Price not found', 'order id has null value type', data.cobalt_classId);
-                        data.cobalt_price = '';
 
                     } else {
                         data.cobalt_price = '0.0000';

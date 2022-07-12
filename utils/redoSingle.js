@@ -7,8 +7,6 @@ var moment = require('moment-timezone');
 require('custom-env').env();
 var fs = require('fs');
 
-// Jesus is here
-
 pushClasses();
 
 async function pushClasses() {

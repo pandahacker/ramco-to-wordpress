@@ -11,8 +11,16 @@ pushClasses();
 
 async function pushClasses() {
 
+    var whichSite;
+
+    if(process.env.STAGING === true){
+        whichSite = 'Staging'
+    }else{
+        whichSite = 'Live'
+    }
+
     sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`);
-    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`);
+    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to [${whichSite}] WordPress Sync started.\n`);
 
     dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
 

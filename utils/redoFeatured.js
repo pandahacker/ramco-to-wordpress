@@ -5,18 +5,16 @@ var moment = require('moment-timezone');
 require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
-var { sendSlackMessage, sendDiscordMessage } = require('./functions.js');
 
 pushClasses();
 
 async function pushClasses() {
 
-    sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`);
-    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}]RAMCO to WordPress Sync started.\n`);
+    //dateStart = moment().format("YYYY-MM-") + "11";
 
-    dateStart = moment().subtract(1, 'hour').format("YYYY-MM-DD" + `T` + "HH" + `:00:00`);
+    dateStart = moment().subtract(1, 'days').format("YYYY-MM-DD");
 
-    //console.log(dateStart);
+    console.log(dateStart);
 
     var pullClasses = new Promise(function (resolve, reject) {
         var options = {
@@ -26,8 +24,8 @@ async function pushClasses() {
                 Key: process.env.API_KEY,
                 Operation: 'GetEntities',
                 Entity: 'cobalt_class',
-                Filter: `createdon<ge>${dateStart} AND statuscode<eq>1`,
-                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode,cobalt_outsideprovider,cobalt_outsideproviderlink,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_publishtoportal'
+                Filter: `cobalt_classbegindate<ge>${dateStart}`,
+                Attributes: 'cobalt_classbegindate,cobalt_classenddate,cobalt_classid,cobalt_locationid,cobalt_name,cobalt_description,cobalt_locationid,cobalt_cobalt_tag_cobalt_class/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_cobalt_classinstructor_cobalt_class/cobalt_name,cobalt_cobalt_class_cobalt_classregistrationfee/cobalt_productid,cobalt_cobalt_class_cobalt_classregistrationfee/statuscode'
             }
 
         }
@@ -49,14 +47,12 @@ async function pushClasses() {
 
             var modifiedData;
 
-            sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
-            console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Found ${data.length} classes. Prepping data for WordPress submit  \n`);
 
             if (data.length > 0) {
 
 
                 modifiedData = data.map(function (data) {
-
+                    console.log(data.cobalt_classId);
                     console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatting ${data.cobalt_name}  \n`);
 
                     var start = moment.tz(data.cobalt_ClassBeginDate.Display, 'Etc/GMT');
@@ -66,8 +62,6 @@ async function pushClasses() {
                     data.cobalt_ClassEndDate.Display = end.tz('America/New_York').format('YYYY-MM-DD HH:mm:SS');
 
                     var orderId = data.cobalt_cobalt_class_cobalt_classregistrationfee.map(function (data) {
-
-                        console.log(data);
 
                         var orderObject = {
                             "id": data.cobalt_productid.Value,
@@ -87,15 +81,8 @@ async function pushClasses() {
                     orderId = _.filter(orderId, (o) => o.id !== '8d6bb524-f1d8-41ad-8c21-ae89d35d4dc3');
 
                     orderId = _.filter(orderId, (o) => o.id !== 'c3102913-ffd4-49d6-9bf6-5f0575b0b635');
-
-                    orderId = _.filter(orderId, function(o){
-                        
-                        if (o.id === null){
-                        sendDiscordMessage('Price not found', 'order id has null value type', data.cobalt_classId);
-                        }
-
-                        return o.id !== null;
-                    });
+                    
+                    orderId = _.filter(orderId, (o) => o.id !== null);
 
                     orderId = _.filter(orderId, (o) => o.status === 1);
 
@@ -129,10 +116,6 @@ async function pushClasses() {
                     // console.log(`-------`);
 
                     data.cobalt_price = data.cobalt_price.slice(0, -2);
-
-                    if(data.cobalt_OutsideProvider === 'true'){
-                        data.cobalt_price = ' ';
-                    }
 
                     const tags = data.cobalt_cobalt_tag_cobalt_class.map(function (data) {
 
@@ -216,7 +199,7 @@ async function pushClasses() {
 
                     //console.log(data.cobalt_LocationId.Display);
                     //console.log(data.cobalt_LocationId.Value);
-
+                    
                     if(data.cobalt_OutsideProvider === 'true'){
                         data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='${data.cobalt_OutsideProviderLink}'" />`
                     }else{
@@ -261,7 +244,6 @@ async function pushClasses() {
 
             }
 
-            sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${modifiedData.length} classes. Checking if classes exist in WordPress  \n`);
             resolve(modifiedData);
 
         })
@@ -270,60 +252,80 @@ async function pushClasses() {
             });
     });
 
-
     var data = await pullClasses;
 
-
-    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Formatted ${data.length} classes. Checking if classes exist in WordPress  \n`);
-
+    //console.log(data.length);
+    var featuredClasses = [];
     var existingClasses = [];
     var newClasses = [];
 
+    
     for (i = 0; i < data.length; i++) {
 
         var checkIfExists = new Promise(function (resolve, reject) {
 
             setTimeout(function () {
                 fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`)
-                    .then(res => resolve(res.status))
-                    .catch(err => reject(`Error: ${err}`));
+                    .then(res => res.json())
+                    .then(function(json){
+                        console.log(`checking class ${i + 1} of ${data.length}`);
+                        resolve(json);
+                    });
             }, 1000)
 
         });
 
-        try {
-            var response = await checkIfExists;
-        } catch (error) {
-            console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${error} \n`);
-        };
+        var response = await checkIfExists;
 
-        //console.log(data[i].cobalt_name);
         //console.log(response);
-        //console.log(data[i].publish);
 
-        console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Checking if "${data[i].cobalt_name} is already in WordPress." Hide_from_listing: ${data[i].publish} Response: ${response} \n`);
+        if (Number.isInteger(response.id)) {
 
-        if (response === 200 || response === 403) {
-            existingClasses.push(data[i]);
+            const responseTags = response.tags.map(function (data) {
+
+                return data.name;
+
+            });
+            
+            var allTags = data[i].cobalt_cobalt_tag_cobalt_class.concat(responseTags);
+
+            console.log(response.url);
+
+            //console.log(data[i].cobalt_cobalt_tag_cobalt_class);
+            //console.log(responseTags);
+            //console.log(allTags);
+
+            var filteredTags = allTags.filter((a, b) => allTags.indexOf(a) === b);
+
+            if (response.image.url === undefined){
+
+                data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
+                console.log(`No class image!`);
+                existingClasses.push(data[i]);
+
+            }else {
+
+                data[i].cobalt_cobalt_tag_cobalt_class = filteredTags;
+                data[i].featuredImage = response.image.url;
+                console.log(response.image.url);
+                featuredClasses.push(data[i]);
+
+            }
+
         } else {
             newClasses.push(data[i]);
         }
 
     };
 
+    console.log(`Found ${existingClasses.length} existing classes and discarding ${newClasses.length} new classes.`);
+
+    
+
+    modifyFeaturedClass(featuredClasses);
 
 
-    //console.log(existingClasses.length);
-    //console.log(newClasses.length);
-
-    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`);
-
-    sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${newClasses.length} new classes and ${existingClasses.length} existing classes found  \n`);
-
-
-    submitNewClass(newClasses);
-
-    function submitNewClass(data) {
+    function modifyFeaturedClass(data) {
         for (var i = 0; i < data.length; i++) {
             // for each iteration console.log a word
             // and make a pause after it
@@ -334,6 +336,7 @@ async function pushClasses() {
                         "status": "publish",
                         "hide_from_listings": data[i].publish,
                         "description": data[i].cobalt_Description,
+                        "image": data[i].featuredImage,
                         "all_day": data[i].all_day,
                         "start_date": data[i].cobalt_ClassBeginDate.Display,
                         "end_date": data[i].cobalt_ClassEndDate.Display,
@@ -348,7 +351,7 @@ async function pushClasses() {
                         }
                     };
 
-                    fetch(process.env.WORDPRESS_URL, {
+                    fetch(`${process.env.WORDPRESS_URL}/by-slug/${data[i].cobalt_classId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -357,27 +360,15 @@ async function pushClasses() {
                         body: JSON.stringify(ramcoClass)
                     }).then(res => res.json()) // expecting a json response
                         .then(body => {
+                            fs.appendFile('logs/results.json', `${moment().format('MM-DD-YYYY h:mm:ss a')}] (${i} of ${data.length}) ${data[i].cobalt_name} submitted successfully \n ${JSON.stringify(body)} \n`, (err) => {
+                                if (err) throw err;
+                            })
+                            console.log(`${moment().format('MM-DD-YYYY h:mm:ss a')}] (${i} of ${data.length}) ${data[i].cobalt_name} submitted successfully \n`)
 
-                            if ("data" in body) {
-
-                                sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_classId} failed because of "${body.message}" \n`);
-
-                                console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_classId} failed because of "${body.message}" \n`)
-
-                            } else {
-
-                                sendSlackMessage(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_classId} submitted successfully \n`);
-
-                                console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] ${data[i].cobalt_classId} submitted successfully \n ${body} \n`)
-
-                            }
                         });
-                    console.log(`[${moment().format('MM-DD-YYYY h:mm:ss a')}] Class ${i + 1} out of ${data.length} new processed: ${data[i].cobalt_classId}
-                    `);
-                }, 3000 * i);
+
+                }, 10000 * i);
             })(i);
         };
-
     }
-
 }

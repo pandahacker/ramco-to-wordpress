@@ -34,7 +34,7 @@ async function pushClasses() {
                 Operation: 'GetEntities',
                 Entity: 'cobalt_meeting',
                 Filter: `cobalt_BeginDate<ge>${dateStart} AND statuscode<eq>1`,
-                Attributes: 'cobalt_BeginDate,cobalt_EndDate,cobalt_meetingId,cobalt_location,cobalt_name,cobalt_description,cobalt_cobalt_tag_cobalt_meeting/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_productid,cobalt_outsideprovider,cobalt_meeting_cobalt_meetingregistrationfees/statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_publishtoportal'
+                Attributes: 'cobalt_BeginDate,cobalt_EndDate,cobalt_meetingId,cobalt_location,cobalt_name,cobalt_description,cobalt_cobalt_tag_cobalt_meeting/cobalt_name,cobalt_fullday,cobalt_publishtoportal,statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_productid,cobalt_outsideprovider,cobalt_meeting_cobalt_meetingregistrationfees/statuscode,cobalt_meeting_cobalt_meetingregistrationfees/cobalt_publishtoportal,cobalt_outsideproviderlink'
             }
 
         }
@@ -175,8 +175,13 @@ async function pushClasses() {
 
                     }
 
+                    if(data.cobalt_OutsideProvider === 'true'){
+                        data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='${data.cobalt_OutsideProviderLink}'" />`
+                    }else{
+                        data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_meetingId}'" />`
+                    }
 
-                    data.cobalt_Description = `${data.cobalt_Description}<br><input style="background-color: #4CAF50;border: none;color: white;padding: 15px 32px;text-align: center;text-decoration: none;display: inline-block;font-size: 16px;" type="button" value="Register Now" onclick="window.location.href='https://miamiportal.ramcoams.net/Authentication/DefaultSingleSignon.aspx?ReturnUrl=%2FEducation%2FRegistration%2FDetails.aspx%3Fcid%3D${data.cobalt_meetingId}'" />`
+                    
 
                     data.cobalt_name = data.cobalt_name;
 

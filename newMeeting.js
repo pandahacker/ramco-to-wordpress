@@ -7,15 +7,7 @@ require('custom-env').env();
 var fs = require('fs');
 var _ = require('lodash');
 
-if(process.env.STAGING === 'true'){
-    cron.schedule('10 * * * *', () => {
-        pushClasses();
-    });
-}else{
-    cron.schedule('40 * * * *', () => {
-        pushClasses();
-    });
-}
+pushClasses();
 
 async function pushClasses() {
 
